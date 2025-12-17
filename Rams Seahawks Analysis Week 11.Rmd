@@ -1,0 +1,282 @@
+---
+title: "Turnover Impact and Win Probability Analysis: Rams vs Seahawks Week 11"
+author: "Navin Chandradat"
+date: "December 16, 2025"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+When two really good teams meet you expect a really good game. When they play in the same division sometimes things can go awry. But what we got here was two really great teams on both sides of the ball and the matchup did not disappoint. Now you could say that on offence a lot went wrong for the Seahawks and while they ultimately lost the game, they only lost by 2 points and could have won if a really long field goal goes through the uprights. Now I wanted to explore two questions: 1) Did the Rams capitalize on the turnovers on defence and 2) Because there were so many turnovers, how did the win probability flow over the course of this game? As mentioned before, these are divisional opponents and they've only played one time so hopefully this analysis ends up being useful for when they meet again.     
+
+---
+ 
+
+```{r load-packages}
+# Loading in our required packages
+# nflfastr
+library(nflreadr)
+library(tidyverse)
+library(nflplotR)
+```
+
+```{r load-data}
+# Load 2025 season data
+pbp_2025 <- load_pbp(2025)
+head(pbp_2025)
+
+# Filter for our specific game
+game_data <- pbp_2025 %>%
+  filter(
+    week == 11,
+    home_team == "LA",
+    away_team == "SEA"
+  )
+head(game_data)
+
+# Quick check
+cat("Total plays in game:", nrow(game_data), "\n")
+cat("Final Score - LA:", max(game_data$home_score, na.rm = TRUE), 
+    "SEA:", max(game_data$away_score, na.rm = TRUE), "\n")
+```
+
+
+---
+
+# Part 1: Turnover Impact Analysis
+
+This game was very intriguing because the Rams were able to take the ball away five times, and yet were only able to win the game by 2 points. This raises the question: Did the Rams effectively capitalize on their defensive turnovers? To answer this, I will analyze expected points and drives following each turnover.
+
+## Identifying Turnovers
+
+```{r turnovers}
+# Identify all turnovers
+# game_data %>%
+#      distinct(interception)
+turnovers <- game_data %>%
+  filter(interception == 1 | fumble_lost == 1) %>%
+  select(
+    qtr, time, down, ydstogo, yardline_100, 
+    desc, posteam, defteam,
+    interception, fumble_lost,
+    ep, epa, wp, wpa
+  ) %>%
+  arrange(qtr, desc(time))
+
+turnovers
+cat("Number of turnovers:", nrow(turnovers), "\n")
+```
+
+
+Taking a look at the turnovers, it seems like going into halftime the Seahawks probably felt pretty good having committed only 1 turnover in the first half and Rams committing none. The story changes going into the second half of the game where the Seahawks committed 3 more, two of them in the third quarter, on top of the Rams committing a turnover of their own. Both teams in the second half committed a turnover that set up the other team with great field position in opponent territory.
+
+
+Now let's take a look at which turnovers had the biggest impact on a teams probability of winning the game.
+
+```{r}
+turnovers %>% 
+     select(qtr, time, defteam, wpa) %>%
+     arrange(desc(abs(wpa)))
+```
+
+Looking at win probability added (WPA values are negative because they reflect the offense's perspective), the first interception that the Seahawks threw had the largest impact to the team's chance at winning at about 18.2%. All turnovers are bad, but these numbers suggest that the first interception set the tone for the rest of the game. This single turnover had nearly double the impact of LA's only turnover at about 9.2%.
+
+
+
+## Expected Points Analysis
+
+```{r expected-points}
+# Calculating expected points for each turnover
+
+turnover_analysis <- turnovers %>%
+  mutate(
+    turnover_team = defteam,
+    turnover_location = yardline_100,
+    turnover_number = row_number(),
+    expected_points = ep
+  )
+
+
+#Change this to look at expect points PER TEAM
+# total_expected <- sum(turnover_analysis$expected_points)
+# cat("Total Expected Points from turnovers:", round(total_expected, 1), "\n")
+```
+
+```{r}
+# To get a summary of turnovers versus expected points
+turnover_analysis %>%
+    group_by(defteam) %>% summarise(
+        turnovers_forced = n(),
+        total_expected_points = sum(expected_points)
+    )
+
+```
+
+Taking a look at the numbers, the Rams forced 4 turnovers but only got 5.6 expected points, an average of 1.4 points per turnover. In theory, this isn't great from the perspective of the Rams because you would think they would've had more expected points given the number of turnovers they had. If you dig a little bit deeper, you see that 3 of the Rams' 4 turnovers were in their own territory. This poor field position helps explain why, even though the Rams were able to force 4 turnovers, they only won the game by two points.
+
+## Drive Analysis
+
+```{r drives}
+# Analyze all drives from the game
+drives <- game_data %>%
+  filter(!is.na(posteam), posteam != "") %>%  # Remove rows without offensive team
+  group_by(fixed_drive) %>%
+  summarise(
+    qtr = first(qtr),
+    posteam = first(posteam),
+    drive_start_yard_line = first(yardline_100),
+    plays = n(),
+    yards = sum(yards_gained, na.rm = TRUE),
+    points_scored = last(posteam_score_post) - first(posteam_score_post),
+    drive_result = case_when(
+      any(touchdown == 1) ~ "Touchdown",
+      any(field_goal_attempt == 1 & field_goal_result == "made") ~ "Field Goal",
+      any(interception == 1 | fumble_lost == 1) ~ "Turnover",
+      any(punt_attempt == 1) ~ "Punt",
+      TRUE ~ "Other"
+    )
+  ) %>%
+  ungroup()
+```
+
+```{r}
+drives
+
+# For future reference because row 8 was an end of half situation there's an error in the points scored entry 
+# it should say 3 points scored
+
+# The drives that say other were either a turnover on downs, a kneeldown, or a field goal kick at the end of halves as time expired
+```
+
+Looking at the drives from the game, we can see that of the four drives following takeaways the Rams were able to score 2 touchdowns resulting in 14 points and the Seahawks were able to walk away with a field goal (3 points) on the drive following their takeaway. Based on our calculations from before we can see that the Rams were expected to score approximately 5.6 points based on their field position after the turnovers and the Seahawks were expected to score approximately 3.6 after their takeaway. This demonstrates that, despite poor field position, the Rams were able to capitalize on their defensive turnovers and converted them into two touchdowns on following drives. But it is worth noting the extra possessions were pivotal in the Rams winning the ball game because on all other offensive drives that didn't follow a turnover, they were only able to score 7 points.
+
+
+
+## Visualization: Turnover Locations
+
+```{r turnover-plot}
+turnover_analysis %>%
+  ggplot(aes(x = turnover_number, y = turnover_location)) +
+  geom_segment(aes(x = turnover_number, xend = turnover_number,
+                   y = 0, yend = turnover_location,
+                   color = turnover_team),
+                size = 2) +
+  geom_point(aes(size = expected_points, color = turnover_team), alpha = 0.7)+
+  # Set team colors
+  scale_color_manual(values = c("LA" = "navy", "SEA" = "green"))+
+  scale_y_reverse(breaks = seq(0, 100, 10)) +
+  labs(
+    title = "Turnover Field Position and Expected Points",
+    x = "Turnovers Over Course of the Game",
+    y = "Yards from Opponent's Goal Line"
+  )
+```
+The visualization shows that field position varied significantly across all of turnovers. While Seattle's single turnover and the Rams' fourth-quarter interception both occurred around the 35-yard line in opponent territory, the Rams' other three turnovers were deep in their own half, between their 21 and 36-yard lines. This explains why, despite forcing four turnovers, the Rams' expected points totaled only 5.6.
+
+
+---
+
+# Part 2: Win Probability Analysis
+
+Now that we know the turnovers helped the Rams win the ball game, let's examine when they happened and which ones had the biggest impact on win probability. While all turnovers affect the game, not all turnovers are created equal. Some occur in higher-leverage situations that drastically swing the odds of winning. This section analyzes which specific plays (turnovers or otherwise) had the greatest impact on the game's outcome.
+
+## Win Probability Data
+
+```{r win-prob-data}
+# Get plays with win probability data
+wp_data <- game_data %>% 
+  filter(!is.na(posteam), posteam != "") %>%
+  filter(!is.na(wp)) %>%
+  select(
+    qtr, time, desc, posteam,
+    home_wp, away_wp,
+    wpa, ep, epa,
+    interception, fumble_lost, touchdown, field_goal_attempt, field_goal_result
+  ) %>%
+  mutate(play_number = row_number())
+
+wp_data
+```
+
+## Biggest Win Probability Swings
+
+```{r biggest-swings}
+# Taking a look at the ten plays that had the largest swings on win probability 
+biggest_swings <- wp_data %>%
+  filter(!is.na(wpa)) %>%
+  arrange(desc(abs(wpa))) %>%
+  head(10)
+
+print(biggest_swings %>% select(qtr, time, posteam, wpa, ep, epa, desc))
+```
+
+```{r}
+biggest_swings %>%
+  mutate(wpa_pct = paste0(round(wpa * 100, 1), "%"))
+```
+
+
+While many plays impacted both teams' ability to win this game, the one with the largest probability swing was the very last play, Seattle's missed 61-yard field goal attempt, which swung win probability by 38.8%. The fact that a team which turned the ball over four times still had a chance to win on the final play speaks to Seattle's  resilience on both sides of the ball and LA's inability to put the game away. It's worth noting that Myers had already made a 57-yard field goal earlier in the game, and with his career long being 61 yards, this was a legitimate scoring opportunity within his range. Beyond the missed kick, the first-quarter interception and one third-quarter interception also ranked among the top three plays in win probability impact, with swings of 18.2% and 17.3% respectively.   
+
+
+
+## Visualization: Win Probability Flow
+
+```{r win-prob-chart}
+ggplot(wp_data, aes(x = play_number)) +
+  geom_line(aes(y = home_wp, color = "LA Rams"), size = 1.5) +
+  geom_line(aes(y = away_wp, color = "SEA Seahawks"), size = 1.5) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", alpha = 0.5) +
+  scale_color_manual(values = c("LA Rams" = "navy", "SEA Seahawks" = "green")) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Win Probability: LA Rams vs Seattle Seahawks",
+    x = "Play Number",
+    y = "Win Probability"
+  )
+```
+
+     
+Looking at the chart, we can see that LA had a win probability of over 50% for the entire game and it peaked around 85% somewhere in the third or fourth quarter. The game started out being very competitive, hovering close to 50/50. Then, following what we know about how this game flowed, it seems the Rams took control likely after that first-quarter interception. It is worth noting that LA's win probability drops from around 75% to 65% on the final play, while Seattle's line shoots up from around 25% to 38%. Despite being dominated most of the game, the Seahawks had a realistic shot at the end, as evidenced by the final spike in the green line showing Seattle's win probability reaching 38% on the missed field goal attempt.
+
+
+---
+
+# Key Findings
+
+This analysis tried to get to the bottom of two questions: Did the Rams capitalize on their takeaways, and how did the turnovers affect the flow of the game and win probability? The data showed us that 2 out 4 drives following a Rams takeaway, they were able to go down and score a touchdown resulting in 14 points. Which is surprising given that they were only expected 5.6 points based on field position. Additionally, the game started off being very competitive, but after that first Sam Darnold interception, the win probability swung in the Rams' favour and they were projected to win for the rest of the ball game. 
+
+This game was close for several reasons. Mainly, 3 out of 4 times after the Rams got a takeaway, they started in their own territory and had to drive close to the length of the field, limiting their expected point totals despite generating turnovers. Additionally, the Rams' offense struggled outside of turnover opportunities, scoring only 7 points on all other drives, revealing their heavy dependence on defensive playmaking. Meanwhile, the Seahawks converted their single takeaway into a field goal and remained within striking distance throughout. Despite trailing for most of the game, Seattle had a legitimate chance to win on the final play with a 61-yard field goal attempt that matched kicker Jason Myers' career long.
+
+
+     
+
+---
+
+# Conclusion
+     
+This analysis shows that while turnovers are a major driver of game outcomes, their impact is highly context dependent. Despite turning the ball over four times, Seattle remained competitive and had a realistic chance to win on the final play. This underscores how factors such as field position, offensive efficiency, and situational leverage can offset even significant turnover disadvantages.
+
+Although the Rams forced four takeaways, they struggled to consistently convert those opportunities into points. Outside of drives following turnovers, their offense produced just seven points, highlighting a reliance on defensive playmaking rather than sustained offensive efficiency.
+
+Future analysis could focus on red zone performance, third-down efficiency, and defensive scheme usage to better understand why both offenses stalled frequently and how specific tactical decisions influenced scoring outcomes.    
+
+---
+
+
+
+
+
+
+
+
+
+
