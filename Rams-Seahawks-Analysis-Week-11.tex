@@ -1,0 +1,678 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Turnover Impact and Win Probability Analysis: Rams vs Seahawks Week 11},
+  pdfauthor={Navin Chandradat},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Turnover Impact and Win Probability Analysis: Rams vs Seahawks
+Week 11}
+\author{Navin Chandradat}
+\date{December 16, 2025}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\section{Introduction}\label{introduction}
+
+When two really good teams meet you expect a really good game. When they
+play in the same division sometimes things can go awry. But what we got
+here was two really great teams on both sides of the ball and the
+matchup did not disappoint. Now you could say that on offence a lot went
+wrong for the Seahawks and while they ultimately lost the game, they
+only lost by 2 points and could have won if a really long field goal
+goes through the uprights. Now I wanted to explore two questions: 1) Did
+the Rams capitalize on the turnovers on defence and 2) Because there
+were so many turnovers, how did the win probability flow over the course
+of this game? As mentioned before, these are divisional opponents and
+they've only played one time so hopefully this analysis ends up being
+useful for when they meet again.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Loading in our required packages}
+\CommentTok{\# nflfastr}
+\FunctionTok{library}\NormalTok{(nflreadr)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(nflplotR)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load 2025 season data}
+\NormalTok{pbp\_2025 }\OtherTok{\textless{}{-}} \FunctionTok{load\_pbp}\NormalTok{(}\DecValTok{2025}\NormalTok{)}
+\FunctionTok{head}\NormalTok{(pbp\_2025)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 372
+##   play_id game_id      old_game_id home_team away_team season_type  week posteam
+##     <dbl> <chr>        <chr>       <chr>     <chr>     <chr>       <int> <chr>  
+## 1       1 2025_01_ARI~ 2025090705  NO        ARI       REG             1 <NA>   
+## 2      40 2025_01_ARI~ 2025090705  NO        ARI       REG             1 ARI    
+## 3      63 2025_01_ARI~ 2025090705  NO        ARI       REG             1 ARI    
+## 4      85 2025_01_ARI~ 2025090705  NO        ARI       REG             1 ARI    
+## 5     115 2025_01_ARI~ 2025090705  NO        ARI       REG             1 ARI    
+## 6     135 2025_01_ARI~ 2025090705  NO        ARI       REG             1 ARI    
+## # i 364 more variables: posteam_type <chr>, defteam <chr>, side_of_field <chr>,
+## #   yardline_100 <dbl>, game_date <chr>, quarter_seconds_remaining <dbl>,
+## #   half_seconds_remaining <dbl>, game_seconds_remaining <dbl>,
+## #   game_half <chr>, quarter_end <dbl>, drive <dbl>, sp <dbl>, qtr <dbl>,
+## #   down <dbl>, goal_to_go <int>, time <chr>, yrdln <chr>, ydstogo <dbl>,
+## #   ydsnet <dbl>, desc <chr>, play_type <chr>, yards_gained <dbl>,
+## #   shotgun <dbl>, no_huddle <dbl>, qb_dropback <dbl>, qb_kneel <dbl>, ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Filter for our specific game}
+\NormalTok{game\_data }\OtherTok{\textless{}{-}}\NormalTok{ pbp\_2025 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}
+\NormalTok{    week }\SpecialCharTok{==} \DecValTok{11}\NormalTok{,}
+\NormalTok{    home\_team }\SpecialCharTok{==} \StringTok{"LA"}\NormalTok{,}
+\NormalTok{    away\_team }\SpecialCharTok{==} \StringTok{"SEA"}
+\NormalTok{  )}
+\FunctionTok{head}\NormalTok{(game\_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 372
+##   play_id game_id      old_game_id home_team away_team season_type  week posteam
+##     <dbl> <chr>        <chr>       <chr>     <chr>     <chr>       <int> <chr>  
+## 1       1 2025_11_SEA~ 2025111609  LA        SEA       REG            11 <NA>   
+## 2      39 2025_11_SEA~ 2025111609  LA        SEA       REG            11 LA     
+## 3      62 2025_11_SEA~ 2025111609  LA        SEA       REG            11 LA     
+## 4      89 2025_11_SEA~ 2025111609  LA        SEA       REG            11 LA     
+## 5     125 2025_11_SEA~ 2025111609  LA        SEA       REG            11 LA     
+## 6     147 2025_11_SEA~ 2025111609  LA        SEA       REG            11 LA     
+## # i 364 more variables: posteam_type <chr>, defteam <chr>, side_of_field <chr>,
+## #   yardline_100 <dbl>, game_date <chr>, quarter_seconds_remaining <dbl>,
+## #   half_seconds_remaining <dbl>, game_seconds_remaining <dbl>,
+## #   game_half <chr>, quarter_end <dbl>, drive <dbl>, sp <dbl>, qtr <dbl>,
+## #   down <dbl>, goal_to_go <int>, time <chr>, yrdln <chr>, ydstogo <dbl>,
+## #   ydsnet <dbl>, desc <chr>, play_type <chr>, yards_gained <dbl>,
+## #   shotgun <dbl>, no_huddle <dbl>, qb_dropback <dbl>, qb_kneel <dbl>, ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Quick check}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Total plays in game:"}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(game\_data), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Total plays in game: 178
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Final Score {-} LA:"}\NormalTok{, }\FunctionTok{max}\NormalTok{(game\_data}\SpecialCharTok{$}\NormalTok{home\_score, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }
+    \StringTok{"SEA:"}\NormalTok{, }\FunctionTok{max}\NormalTok{(game\_data}\SpecialCharTok{$}\NormalTok{away\_score, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Final Score - LA: 21 SEA: 19
+\end{verbatim}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Part 1: Turnover Impact
+Analysis}\label{part-1-turnover-impact-analysis}
+
+This game was very intriguing because the Rams were able to take the
+ball away five times, and yet were only able to win the game by 2
+points. This raises the question: Did the Rams effectively capitalize on
+their defensive turnovers? To answer this, I will analyze expected
+points and drives following each turnover.
+
+\subsection{Identifying Turnovers}\label{identifying-turnovers}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Identify all turnovers}
+\CommentTok{\# game\_data \%\textgreater{}\%}
+\CommentTok{\#      distinct(interception)}
+\NormalTok{turnovers }\OtherTok{\textless{}{-}}\NormalTok{ game\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(interception }\SpecialCharTok{==} \DecValTok{1} \SpecialCharTok{|}\NormalTok{ fumble\_lost }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}
+\NormalTok{    qtr, time, down, ydstogo, yardline\_100, }
+\NormalTok{    desc, posteam, defteam,}
+\NormalTok{    interception, fumble\_lost,}
+\NormalTok{    ep, epa, wp, wpa}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(qtr, }\FunctionTok{desc}\NormalTok{(time))}
+
+\NormalTok{turnovers}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 5 x 14
+##     qtr time   down ydstogo yardline_100 desc       posteam defteam interception
+##   <dbl> <chr> <dbl>   <dbl>        <dbl> <chr>      <chr>   <chr>          <dbl>
+## 1     1 10:59     1      10           79 (10:59) (~ SEA     LA                 1
+## 2     3 14:19     3       9           64 (14:19) (~ SEA     LA                 1
+## 3     3 14:09     2      10           35 (14:09) (~ LA      SEA                0
+## 4     3 01:15     1      20           73 (1:15) 14~ SEA     LA                 1
+## 5     4 10:55     3       3           36 (10:55) (~ SEA     LA                 1
+## # i 5 more variables: fumble_lost <dbl>, ep <dbl>, epa <dbl>, wp <dbl>,
+## #   wpa <dbl>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Number of turnovers:"}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(turnovers), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Number of turnovers: 5
+\end{verbatim}
+
+Taking a look at the turnovers, it seems like going into halftime the
+Seahawks probably felt pretty good having committed only 1 turnover in
+the first half and Rams committing none. The story changes going into
+the second half of the game where the Seahawks committed 3 more, two of
+them in the third quarter, on top of the Rams committing a turnover of
+their own. Both teams in the second half committed a turnover that set
+up the other team with great field position in opponent territory.
+
+Now let's take a look at which turnovers had the biggest impact on a
+teams probability of winning the game.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{turnovers }\SpecialCharTok{\%\textgreater{}\%} 
+     \FunctionTok{select}\NormalTok{(qtr, time, defteam, wpa) }\SpecialCharTok{\%\textgreater{}\%}
+     \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(}\FunctionTok{abs}\NormalTok{(wpa)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 5 x 4
+##     qtr time  defteam     wpa
+##   <dbl> <chr> <chr>     <dbl>
+## 1     1 10:59 LA      -0.182 
+## 2     3 01:15 LA      -0.173 
+## 3     4 10:55 LA      -0.112 
+## 4     3 14:09 SEA     -0.0919
+## 5     3 14:19 LA      -0.0564
+\end{verbatim}
+
+Looking at win probability added (WPA values are negative because they
+reflect the offense's perspective), the first interception that the
+Seahawks threw had the largest impact to the team's chance at winning at
+about 18.2\%. All turnovers are bad, but these numbers suggest that the
+first interception set the tone for the rest of the game. This single
+turnover had nearly double the impact of LA's only turnover at about
+9.2\%.
+
+\subsection{Expected Points Analysis}\label{expected-points-analysis}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Calculating expected points for each turnover}
+
+\NormalTok{turnover\_analysis }\OtherTok{\textless{}{-}}\NormalTok{ turnovers }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{turnover\_team =}\NormalTok{ defteam,}
+    \AttributeTok{turnover\_location =}\NormalTok{ yardline\_100,}
+    \AttributeTok{turnover\_number =} \FunctionTok{row\_number}\NormalTok{(),}
+    \AttributeTok{expected\_points =}\NormalTok{ ep}
+\NormalTok{  )}
+
+
+\CommentTok{\#Change this to look at expect points PER TEAM}
+\CommentTok{\# total\_expected \textless{}{-} sum(turnover\_analysis$expected\_points)}
+\CommentTok{\# cat("Total Expected Points from turnovers:", round(total\_expected, 1), "\textbackslash{}n")}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# To get a summary of turnovers versus expected points}
+\NormalTok{turnover\_analysis }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(defteam) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{summarise}\NormalTok{(}
+        \AttributeTok{turnovers\_forced =} \FunctionTok{n}\NormalTok{(),}
+        \AttributeTok{total\_expected\_points =} \FunctionTok{sum}\NormalTok{(expected\_points)}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 3
+##   defteam turnovers_forced total_expected_points
+##   <chr>              <int>                 <dbl>
+## 1 LA                     4                  5.58
+## 2 SEA                    1                  3.61
+\end{verbatim}
+
+Taking a look at the numbers, the Rams forced 4 turnovers but only got
+5.6 expected points, an average of 1.4 points per turnover. In theory,
+this isn't great from the perspective of the Rams because you would
+think they would've had more expected points given the number of
+turnovers they had. If you dig a little bit deeper, you see that 3 of
+the Rams' 4 turnovers were in their own territory. This poor field
+position helps explain why, even though the Rams were able to force 4
+turnovers, they only won the game by two points.
+
+\subsection{Drive Analysis}\label{drive-analysis}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Analyze all drives from the game}
+\NormalTok{drives }\OtherTok{\textless{}{-}}\NormalTok{ game\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(posteam), posteam }\SpecialCharTok{!=} \StringTok{""}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}  \CommentTok{\# Remove rows without offensive team}
+  \FunctionTok{group\_by}\NormalTok{(fixed\_drive) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}
+    \AttributeTok{qtr =} \FunctionTok{first}\NormalTok{(qtr),}
+    \AttributeTok{posteam =} \FunctionTok{first}\NormalTok{(posteam),}
+    \AttributeTok{drive\_start\_yard\_line =} \FunctionTok{first}\NormalTok{(yardline\_100),}
+    \AttributeTok{plays =} \FunctionTok{n}\NormalTok{(),}
+    \AttributeTok{yards =} \FunctionTok{sum}\NormalTok{(yards\_gained, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{points\_scored =} \FunctionTok{last}\NormalTok{(posteam\_score\_post) }\SpecialCharTok{{-}} \FunctionTok{first}\NormalTok{(posteam\_score\_post),}
+    \AttributeTok{drive\_result =} \FunctionTok{case\_when}\NormalTok{(}
+      \FunctionTok{any}\NormalTok{(touchdown }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) }\SpecialCharTok{\textasciitilde{}} \StringTok{"Touchdown"}\NormalTok{,}
+      \FunctionTok{any}\NormalTok{(field\_goal\_attempt }\SpecialCharTok{==} \DecValTok{1} \SpecialCharTok{\&}\NormalTok{ field\_goal\_result }\SpecialCharTok{==} \StringTok{"made"}\NormalTok{) }\SpecialCharTok{\textasciitilde{}} \StringTok{"Field Goal"}\NormalTok{,}
+      \FunctionTok{any}\NormalTok{(interception }\SpecialCharTok{==} \DecValTok{1} \SpecialCharTok{|}\NormalTok{ fumble\_lost }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) }\SpecialCharTok{\textasciitilde{}} \StringTok{"Turnover"}\NormalTok{,}
+      \FunctionTok{any}\NormalTok{(punt\_attempt }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) }\SpecialCharTok{\textasciitilde{}} \StringTok{"Punt"}\NormalTok{,}
+      \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \StringTok{"Other"}
+\NormalTok{    )}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ungroup}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{drives}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 24 x 8
+##    fixed_drive   qtr posteam drive_start_yard_line plays yards points_scored
+##          <dbl> <dbl> <chr>                   <dbl> <int> <dbl>         <dbl>
+##  1           1     1 LA                         35     8    47             0
+##  2           2     1 SEA                        92     3    13             0
+##  3           3     1 LA                          3     5     3             7
+##  4           4     1 SEA                        35     7    26             3
+##  5           5     1 LA                         35    13    84             7
+##  6           6     1 SEA                        35    17    43             3
+##  7           7     2 LA                         35     5     1             0
+##  8           8     2 SEA                        92    15    89             3
+##  9           9     3 SEA                        35     4     1             0
+## 10          10     3 LA                         35     2     7             0
+## # i 14 more rows
+## # i 1 more variable: drive_result <chr>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# For future reference because row 8 was an end of half situation there\textquotesingle{}s an error in the points scored entry }
+\CommentTok{\# it should say 3 points scored}
+
+\CommentTok{\# The drives that say other were either a turnover on downs, a kneeldown, or a field goal kick at the end of halves as time expired}
+\end{Highlighting}
+\end{Shaded}
+
+Looking at the drives from the game, we can see that of the four drives
+following takeaways the Rams were able to score 2 touchdowns resulting
+in 14 points and the Seahawks were able to walk away with a field goal
+(3 points) on the drive following their takeaway. Based on our
+calculations from before we can see that the Rams were expected to score
+approximately 5.6 points based on their field position after the
+turnovers and the Seahawks were expected to score approximately 3.6
+after their takeaway. This demonstrates that, despite poor field
+position, the Rams were able to capitalize on their defensive turnovers
+and converted them into two touchdowns on following drives. But it is
+worth noting the extra possessions were pivotal in the Rams winning the
+ball game because on all other offensive drives that didn't follow a
+turnover, they were only able to score 7 points.
+
+\subsection{Visualization: Turnover
+Locations}\label{visualization-turnover-locations}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{turnover\_analysis }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ turnover\_number, }\AttributeTok{y =}\NormalTok{ turnover\_location)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_segment}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ turnover\_number, }\AttributeTok{xend =}\NormalTok{ turnover\_number,}
+                   \AttributeTok{y =} \DecValTok{0}\NormalTok{, }\AttributeTok{yend =}\NormalTok{ turnover\_location,}
+                   \AttributeTok{color =}\NormalTok{ turnover\_team),}
+                \AttributeTok{size =} \DecValTok{2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{size =}\NormalTok{ expected\_points, }\AttributeTok{color =}\NormalTok{ turnover\_team), }\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{)}\SpecialCharTok{+}
+  \CommentTok{\# Set team colors}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"LA"} \OtherTok{=} \StringTok{"navy"}\NormalTok{, }\StringTok{"SEA"} \OtherTok{=} \StringTok{"green"}\NormalTok{))}\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_reverse}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{10}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Turnover Field Position and Expected Points"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Turnovers Over Course of the Game"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Yards from Opponent\textquotesingle{}s Goal Line"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Rams-Seahawks-Analysis-Week-11_files/figure-latex/turnover-plot-1.pdf}}
+The visualization shows that field position varied significantly across
+all of turnovers. While Seattle's single turnover and the Rams'
+fourth-quarter interception both occurred around the 35-yard line in
+opponent territory, the Rams' other three turnovers were deep in their
+own half, between their 21 and 36-yard lines. This explains why, despite
+forcing four turnovers, the Rams' expected points totaled only 5.6.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Part 2: Win Probability
+Analysis}\label{part-2-win-probability-analysis}
+
+Now that we know the turnovers helped the Rams win the ball game, let's
+examine when they happened and which ones had the biggest impact on win
+probability. While all turnovers affect the game, not all turnovers are
+created equal. Some occur in higher-leverage situations that drastically
+swing the odds of winning. This section analyzes which specific plays
+(turnovers or otherwise) had the greatest impact on the game's outcome.
+
+\subsection{Win Probability Data}\label{win-probability-data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Get plays with win probability data}
+\NormalTok{wp\_data }\OtherTok{\textless{}{-}}\NormalTok{ game\_data }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(posteam), posteam }\SpecialCharTok{!=} \StringTok{""}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(wp)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}
+\NormalTok{    qtr, time, desc, posteam,}
+\NormalTok{    home\_wp, away\_wp,}
+\NormalTok{    wpa, ep, epa,}
+\NormalTok{    interception, fumble\_lost, touchdown, field\_goal\_attempt, field\_goal\_result}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{play\_number =} \FunctionTok{row\_number}\NormalTok{())}
+
+\NormalTok{wp\_data}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 165 x 15
+##      qtr time  desc  posteam home_wp away_wp      wpa    ep     epa interception
+##    <dbl> <chr> <chr> <chr>     <dbl>   <dbl>    <dbl> <dbl>   <dbl>        <dbl>
+##  1     1 15:00 5-J.~ LA        0.546   0.454  0.00623 1.84   0.300             0
+##  2     1 14:55 (14:~ LA        0.552   0.448 -0.0182  2.14  -0.593             0
+##  3     1 14:51 (14:~ LA        0.534   0.466  0.0502  1.55   1.91              0
+##  4     1 14:19 (14:~ LA        0.584   0.416  0.0753  3.45   1.82              0
+##  5     1 13:33 (13:~ LA        0.660   0.340 -0.00285 5.27  -0.159             0
+##  6     1 12:52 (12:~ LA        0.657   0.343 -0.0239  5.11  -0.826             0
+##  7     1 12:48 (12:~ LA        0.633   0.367 -0.00371 4.28  -0.0901            0
+##  8     1 12:12 (12:~ LA        0.629   0.371 -0.101   4.19  -4.38              0
+##  9     1 12:07 (12:~ SEA       0.529   0.471  0.0126  0.187  0.707             0
+## 10     1 11:27 (11:~ SEA       0.516   0.484  0.00515 0.894  0.209             0
+## # i 155 more rows
+## # i 5 more variables: fumble_lost <dbl>, touchdown <dbl>,
+## #   field_goal_attempt <dbl>, field_goal_result <chr>, play_number <int>
+\end{verbatim}
+
+\subsection{Biggest Win Probability
+Swings}\label{biggest-win-probability-swings}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Taking a look at the ten plays that had the largest swings on win probability }
+\NormalTok{biggest\_swings }\OtherTok{\textless{}{-}}\NormalTok{ wp\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(wpa)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(}\FunctionTok{abs}\NormalTok{(wpa))) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{head}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+
+\FunctionTok{print}\NormalTok{(biggest\_swings }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(qtr, time, posteam, wpa, ep, epa, desc))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 10 x 7
+##      qtr time  posteam     wpa      ep    epa desc                              
+##    <dbl> <chr> <chr>     <dbl>   <dbl>  <dbl> <chr>                             
+##  1     4 00:01 SEA     -0.388   1.32   -1.32  (:01) 5-J.Myers 61 yard field goa~
+##  2     1 10:59 SEA     -0.182   1.10   -7.43  (10:59) (No Huddle) 14-S.Darnold ~
+##  3     3 01:15 SEA     -0.173   1.25   -5.80  (1:15) 14-S.Darnold pass deep mid~
+##  4     1 01:41 LA       0.134   2.38    4.18  (1:41) 23-K.Williams left tackle ~
+##  5     4 00:05 SEA      0.116   0.607   0.711 (:05) (Shotgun) 14-S.Darnold pass~
+##  6     4 10:55 SEA     -0.112   2.96   -5.84  (10:55) (Shotgun) 14-S.Darnold pa~
+##  7     4 01:50 LA      -0.111  -0.0277  0.173 (1:50) 42-E.Evans punts 50 yards ~
+##  8     1 12:12 LA      -0.101   4.19   -4.38  (12:12) 9-M.Stafford pass incompl~
+##  9     3 01:28 LA      -0.0991 -0.110  -2.05  (1:28) 42-E.Evans punts 31 yards ~
+## 10     3 14:09 LA      -0.0919  3.61   -5.21  (14:09) (Shotgun) 9-M.Stafford pa~
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{biggest\_swings }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{wpa\_pct =} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(wpa }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{), }\StringTok{"\%"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 10 x 16
+##      qtr time  desc  posteam home_wp away_wp     wpa      ep    epa interception
+##    <dbl> <chr> <chr> <chr>     <dbl>   <dbl>   <dbl>   <dbl>  <dbl>        <dbl>
+##  1     4 00:01 (:01~ SEA       0.612   0.388 -0.388   1.32   -1.32             0
+##  2     1 10:59 (10:~ SEA       0.511   0.489 -0.182   1.10   -7.43             1
+##  3     3 01:15 (1:1~ SEA       0.606   0.394 -0.173   1.25   -5.80             1
+##  4     1 01:41 (1:4~ LA        0.649   0.351  0.134   2.38    4.18             0
+##  5     4 00:05 (:05~ SEA       0.728   0.272  0.116   0.607   0.711            0
+##  6     4 10:55 (10:~ SEA       0.814   0.186 -0.112   2.96   -5.84             1
+##  7     4 01:50 (1:5~ LA        0.852   0.148 -0.111  -0.0277  0.173            0
+##  8     1 12:12 (12:~ LA        0.629   0.371 -0.101   4.19   -4.38             0
+##  9     3 01:28 (1:2~ LA        0.662   0.338 -0.0991 -0.110  -2.05             0
+## 10     3 14:09 (14:~ LA        0.774   0.226 -0.0919  3.61   -5.21             0
+## # i 6 more variables: fumble_lost <dbl>, touchdown <dbl>,
+## #   field_goal_attempt <dbl>, field_goal_result <chr>, play_number <int>,
+## #   wpa_pct <chr>
+\end{verbatim}
+
+While many plays impacted both teams' ability to win this game, the one
+with the largest probability swing was the very last play, Seattle's
+missed 61-yard field goal attempt, which swung win probability by
+38.8\%. The fact that a team which turned the ball over four times still
+had a chance to win on the final play speaks to Seattle's resilience on
+both sides of the ball and LA's inability to put the game away. It's
+worth noting that Myers had already made a 57-yard field goal earlier in
+the game, and with his career long being 61 yards, this was a legitimate
+scoring opportunity within his range. Beyond the missed kick, the
+first-quarter interception and one third-quarter interception also
+ranked among the top three plays in win probability impact, with swings
+of 18.2\% and 17.3\% respectively.
+
+\subsection{Visualization: Win Probability
+Flow}\label{visualization-win-probability-flow}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(wp\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ play\_number)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =}\NormalTok{ home\_wp, }\AttributeTok{color =} \StringTok{"LA Rams"}\NormalTok{), }\AttributeTok{size =} \FloatTok{1.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =}\NormalTok{ away\_wp, }\AttributeTok{color =} \StringTok{"SEA Seahawks"}\NormalTok{), }\AttributeTok{size =} \FloatTok{1.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"LA Rams"} \OtherTok{=} \StringTok{"navy"}\NormalTok{, }\StringTok{"SEA Seahawks"} \OtherTok{=} \StringTok{"green"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{()) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Win Probability: LA Rams vs Seattle Seahawks"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Play Number"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Win Probability"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Rams-Seahawks-Analysis-Week-11_files/figure-latex/win-prob-chart-1.pdf}}
+
+Looking at the chart, we can see that LA had a win probability of over
+50\% for the entire game and it peaked around 85\% somewhere in the
+third or fourth quarter. The game started out being very competitive,
+hovering close to 50/50. Then, following what we know about how this
+game flowed, it seems the Rams took control likely after that
+first-quarter interception. It is worth noting that LA's win probability
+drops from around 75\% to 65\% on the final play, while Seattle's line
+shoots up from around 25\% to 38\%. Despite being dominated most of the
+game, the Seahawks had a realistic shot at the end, as evidenced by the
+final spike in the green line showing Seattle's win probability reaching
+38\% on the missed field goal attempt.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Key Findings}\label{key-findings}
+
+This analysis tried to get to the bottom of two questions: Did the Rams
+capitalize on their takeaways, and how did the turnovers affect the flow
+of the game and win probability? The data showed us that 2 out 4 drives
+following a Rams takeaway, they were able to go down and score a
+touchdown resulting in 14 points. Which is surprising given that they
+were only expected 5.6 points based on field position. Additionally, the
+game started off being very competitive, but after that first Sam
+Darnold interception, the win probability swung in the Rams' favour and
+they were projected to win for the rest of the ball game.
+
+This game was close for several reasons. Mainly, 3 out of 4 times after
+the Rams got a takeaway, they started in their own territory and had to
+drive close to the length of the field, limiting their expected point
+totals despite generating turnovers. Additionally, the Rams' offense
+struggled outside of turnover opportunities, scoring only 7 points on
+all other drives, revealing their heavy dependence on defensive
+playmaking. Meanwhile, the Seahawks converted their single takeaway into
+a field goal and remained within striking distance throughout. Despite
+trailing for most of the game, Seattle had a legitimate chance to win on
+the final play with a 61-yard field goal attempt that matched kicker
+Jason Myers' career long.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Conclusion}\label{conclusion}
+
+This analysis shows that while turnovers are a major driver of game
+outcomes, their impact is highly context dependent. Despite turning the
+ball over four times, Seattle remained competitive and had a realistic
+chance to win on the final play. This underscores how factors such as
+field position, offensive efficiency, and situational leverage can
+offset even significant turnover disadvantages.
+
+Although the Rams forced four takeaways, they struggled to consistently
+convert those opportunities into points. Outside of drives following
+turnovers, their offense produced just seven points, highlighting a
+reliance on defensive playmaking rather than sustained offensive
+efficiency.
+
+Future analysis could focus on red zone performance, third-down
+efficiency, and defensive scheme usage to better understand why both
+offenses stalled frequently and how specific tactical decisions
+influenced scoring outcomes.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\end{document}

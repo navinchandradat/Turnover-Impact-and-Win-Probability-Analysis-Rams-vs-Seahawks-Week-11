@@ -1,12 +1,14 @@
 ---
-title: "Turnover Impact and Win Probability Analysis: Rams vs Seahawks Week 11"
+title: 'Turnover Impact and Win Probability Analysis: Rams vs Seahawks Week 11'
 author: "Navin Chandradat"
 date: "December 16, 2025"
-output: 
+output:
   html_document:
     toc: true
     toc_float: true
     code_folding: show
+  pdf_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
