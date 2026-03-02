@@ -1,0 +1,159 @@
+---
+title: "Testing Packages for Coverage Data"
+output: html_notebook
+---
+
+```{r}
+library(nflreadr)
+library(nflfastR)
+library(tidyverse)
+```
+
+
+```{r}
+# Load FTN charting data
+ftn_data <- load_ftn_charting(seasons = 2025)
+```
+
+
+```{r}
+# Check what columns it has
+names(ftn_data)
+```
+
+
+```{r}
+# Look at the data dictionary
+?dictionary_ftn_charting
+# OR
+View(nflreadr::dictionary_ftn_charting)
+```
+
+
+```{r}
+# Filter for your game
+ftn_rams_seahawks <- ftn_data %>%
+  filter(week == 11, ftn_game_id == 6893)
+
+head(ftn_rams_seahawks)
+
+# Want to join nflverse_play_id here to play_id in the game_data dataframe
+```
+
+
+
+
+```{r}
+participation_data <- load_participation(seasons = 2025)
+#View(nflreadr::dictionary_participation)
+```
+
+
+```{r}
+# DO THIS FOR WHEN THE 2025 SEASON WRAPS AFTER THE SUPER BOWL
+
+# Try loading 2025 to see the structure
+participation_2025 <- load_participation(seasons = 2025)
+
+# See if 2024 has data
+nrow(participation_2025)
+
+# If it has data, see the columns
+names(participation_2025)
+
+# Check what weeks are available
+participation_2025 %>%
+  distinct(nflverse_game_id) %>%
+  arrange(nflverse_game_id)
+```
+
+```{r}
+participation_2025 %>%
+  arrange(nflverse_game_id) %>% 
+  filter(nflverse_game_id == '2025_11_SEA_LA')
+```
+
+
+
+```{r}
+game_data_extra_context <- full_join(
+  game_data,
+  ftn_rams_seahawks,
+  by = c("play_id" = "nflverse_play_id")
+)
+
+
+game_data_extra_context <- left_join(
+  game_data_extra_context,
+  participation_2025,
+  by = c("game_id" = "nflverse_game_id",
+         "play_id" = "play_id")
+)
+
+
+head(game_data_extra_context)
+```
+
+
+```{r}
+View(nflreadr::dictionary_pbp)
+```
+
+```{r}
+View(nflreadr::dictionary_participation)
+```
+
+```{r}
+# Strip the nflverse class attributes
+interception_analysis <- game_data_extra_context %>%
+  as_tibble() %>%  # Convert to regular tibble
+  filter(interception == 1) %>%
+  select(
+    qtr, desc,
+    defense_coverage_type,
+    defense_man_zone_type,
+    was_pressure,
+    read_thrown,
+    n_blitzers,
+    is_qb_out_of_pocket,
+    is_interception_worthy
+  )
+
+interception_analysis
+```
+
+
+
+```{r}
+turnovers_test <- game_data_extra_context %>%
+  as_tibble() %>%  # Add this to avoid the print error
+  filter(interception == 1 | fumble_lost == 1) %>%
+  select(
+    qtr, time, down, ydstogo, yardline_100, 
+    desc, posteam, defteam,
+    interception, fumble_lost,
+    ep, epa, wp, wpa, 
+    is_interception_worthy, 
+    n_defense_box, n_blitzers, n_pass_rushers,
+    # ADD THESE - the coverage columns we've been waiting for!
+    defense_coverage_type,
+    defense_man_zone_type,
+    was_pressure,
+    read_thrown,
+    is_qb_out_of_pocket
+  ) %>%
+  arrange(qtr, desc(time))
+
+turnovers_test
+cat("Number of turnovers:", nrow(turnovers_test), "\n")
+```
+
+Turnovers when rarely blitzed -> look at rush success rate?
+Look at the avg number of players in the box, blitzers, pass rushers the Rams Defence used
+
+
+
+
+
+
+
