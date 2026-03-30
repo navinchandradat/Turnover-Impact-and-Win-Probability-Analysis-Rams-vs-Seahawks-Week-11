@@ -1,13 +1,15 @@
 ---
-title: 'Turnover Impact and Win Probability Analysis: Rams vs Seahawks Week 11'
+title: 'Turnover Impact and Win Probability Analysis: Rams vs Seahawks Week 11 2025'
 author: "Navin Chandradat"
-date: "December 16, 2025"
+date: "March 26, 2026"
 output:
   html_document:
     toc: true
     toc_float: true
     code_folding: show
   pdf_document:
+    toc: true
+  word_document:
     toc: true
 ---
 
@@ -17,14 +19,14 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 # Introduction
 
-When two really good teams meet you expect a really good game. When they play in the same division sometimes things can go awry. But what we got here was two really great teams on both sides of the ball and the matchup did not disappoint. Now you could say that on offence a lot went wrong for the Seahawks and while they ultimately lost the game, they only lost by 2 points and could have won if a really long field goal goes through the uprights. Now I wanted to explore two questions: 1) Did the Rams capitalize on the turnovers on defense and 2) Because there were so many turnovers, how did the win probability flow over the course of this game? As mentioned before, these are divisional opponents and it's their first meeting of the season, so hopefully this analysis ends up being useful for when they meet again.
+When two really good teams meet you expect a really good game. When they play in the same division sometimes things can go awry. But what we got here was two really great teams on both sides of the ball and the matchup did not disappoint. Now you could say that on offence a lot went wrong for the Seahawks and while they ultimately lost the game 21-19. They only lost by 2 points and could have won if a really long field goal goes through the uprights. Now I wanted to explore two questions: 1) Did the Rams capitalize on the turnovers on defense and 2) Because there were so many turnovers, how did the win probability flow over the course of this game? As mentioned before, these are divisional opponents and it's their first meeting of the season, so hopefully this analysis ends up being useful for when they meet again.
 
 FTN Data via nflverse
 
 ---
  
 
-```{r load-packages}
+```{r load-packages, echo=FALSE}
 # Loading in our required packages
 library(nflfastR)
 library(nflreadr)
@@ -32,7 +34,7 @@ library(tidyverse)
 library(nflplotR)
 ```
 
-```{r load-data}
+```{r load-data, include=FALSE}
 # Load 2025 season data
 pbp_2025 <- load_pbp(2025)
 head(pbp_2025)
@@ -52,12 +54,12 @@ cat("Final Score - LA:", max(game_data$home_score, na.rm = TRUE),
     "SEA:", max(game_data$away_score, na.rm = TRUE), "\n")
 ```
 
-```{r}
+```{r, include=FALSE}
 # Load FTN charting data
 ftn_data <- load_ftn_charting(seasons = 2025)
 ```
 
-```{r}
+```{r, include=FALSE}
 # Filter for this game
 ftn_rams_seahawks <- ftn_data %>%
   filter(week == 11, ftn_game_id == 6893)
@@ -65,12 +67,14 @@ ftn_rams_seahawks <- ftn_data %>%
 head(ftn_rams_seahawks)
 ```
 
-```{r}
+```{r, include=FALSE}
 # For coverage and scheme data
 participation_2025 <- load_participation(seasons = 2025)
+
+head(participation_2025)
 ```
 
-```{r}
+```{r, include=FALSE}
 game_data_extra_context <- full_join(
   game_data,
   ftn_rams_seahawks,
@@ -102,7 +106,7 @@ This game was very intriguing because the Rams were able to take the ball away f
 
 ## Identifying Turnovers
 
-```{r turnovers}
+```{r turnovers, echo=FALSE}
 # Identify all turnovers
 
 turnovers <- game_data_extra_context %>%
@@ -111,12 +115,14 @@ turnovers <- game_data_extra_context %>%
     qtr, time, down, ydstogo, yardline_100, 
     desc, posteam, defteam,
     interception, fumble_lost,
-    ep, epa, wp, wpa,
+    ep, epa, wp, wpa, fixed_drive,
     pass_length, pass_location,
     defenders_in_box, defense_personnel, 
     number_of_pass_rushers, time_to_throw,
     was_pressure, route, defense_man_zone_type,
-    defense_coverage_type
+    defense_coverage_type, is_interception_worthy,
+    is_catchable_ball,
+    route, read_thrown
   ) %>%
   arrange(qtr, desc(time))
 
@@ -130,9 +136,9 @@ Taking a look at the turnovers, it seems like going into halftime the Seahawks p
 
 Now let's take a look at which turnovers had the biggest impact on a teams probability of winning the game.
 
-```{r}
+```{r, echo=FALSE}
 turnovers %>% 
-     select(qtr, time, defteam, wpa, epa) %>%
+     select(qtr, time, defteam, down, ydstogo, yardline_100, wpa, epa) %>%
      arrange(desc(abs(wpa)))
 ```
 
@@ -140,14 +146,15 @@ Looking at win probability added (WPA values are negative because they reflect t
 
 Now I wanted to try and dig a little deeper into the context of these turnovers. Were the Rams doing the same thing each time in terms of personnel/coverage? Or were they trying to force Darnold to get rid of the ball quickly? Let's take a look.
 
-```{r}
+```{r, echo=FALSE}
 turnovers %>% 
-     select(qtr, time, defteam, wpa, epa,
-            pass_length, pass_location,
-            defenders_in_box, defense_personnel, 
-            number_of_pass_rushers, time_to_throw,
-            was_pressure, route, defense_man_zone_type,
-            defense_coverage_type) %>%
+     # select(qtr, time, defteam, wpa, ep, epa,
+     #        pass_length, pass_location,
+     #        defenders_in_box, defense_personnel, 
+     #        number_of_pass_rushers, time_to_throw,
+     #        was_pressure, route, defense_man_zone_type,
+     #        defense_coverage_type) %>%
+    select(-c(desc, posteam)) %>%   
     filter(defteam == 'LA') %>%   
      arrange(desc(abs(epa))) #%>% view()
 ```
@@ -161,9 +168,10 @@ Looking at the data what I saw was:
 I would have to dig deeper to try and piece together what the gameplan was but I'd be curious to see how often the Rams were in Nickel or how often were they playing with a light box because that would dictate how they would've wanted the Seahawks to run their offense. 
 
 
-## Expected Points Analysis
+## Expected Points Added Analysis
 
-```{r expected-points}
+
+```{r expected-points-added, include=FALSE}
 # Calculating expected points for each turnover
 
 turnover_analysis <- turnovers %>%
@@ -182,31 +190,41 @@ turnover_analysis <- turnovers %>%
 # total_epa
 ```
 
-```{r}
+
+```{r, echo=FALSE}
 # To get a summary of turnovers versus expected points added
 turnover_analysis %>%
     group_by(defteam) %>% summarise(
         turnovers_forced = n(),
-        total_expected_points = sum(expected_points),
         total_expected_points_added = sum(expected_points_added)
     )
 
 ```
 
-Taking a look at the numbers, the Rams defense was able to create -23.46 EPA off of those four turnovers. That is pretty impressive a definitely helped them win the ball game even if it was only by 2 points. If you dig a little bit deeper, you see that 3 of the Rams' 4 turnovers were in their own territory. This poor field position helps explain why, even though the Rams were able to force 4 turnovers, they only won the game by two points.
+Taking a look at the numbers, the Rams defense was able to create -23.46 EPA off of those four turnovers. That is pretty impressive a definitely helped them win the ball game even if it was only by 2 points. If you dig a little bit deeper, you see that 3 of the Rams' 4 turnovers resulted in field position in Seattle territory. Getting great field position that many times and not scoring more points was definitely a positive for that Seattle defense. 
+
+
 
 
 ## Drive Analysis
 
-```{r drives}
+```{r}
+# game_data_extra_context %>%
+#     filter(!is.na(posteam), posteam != "", 
+#             play_type %in% c("run", "pass", "no_play"), timeout == 0) %>% select(home_team, away_team, posteam, defteam, drive, qtr, down, time, yrdln, ydsnet, desc, play_type, yards_gained, home_timeouts_remaining, away_timeouts_remaining, timeout)
+```
+
+
+```{r drives, include=FALSE}
 # Analyze all drives from the game
 drives <- game_data_extra_context %>%
-  filter(!is.na(posteam), posteam != "") %>%  # Remove rows without offensive team
+  filter(!is.na(posteam), posteam != "", 
+         play_type %in% c("run", "pass", "no_play", "field_goal", "extra_point"), timeout == 0) %>%  # Remove rows without offensive team
   group_by(fixed_drive) %>%
   summarise(
     qtr = first(qtr),
     posteam = first(posteam),
-    drive_start_yard_line = first(yardline_100),
+    drive_start_yard_line = first(yrdln), #yardline_100 for team name+yard line
     plays = n(),
     yards = sum(yards_gained, na.rm = TRUE),
     points_scored = last(posteam_score_post) - first(posteam_score_post),
@@ -222,7 +240,33 @@ drives <- game_data_extra_context %>%
 ```
 
 ```{r}
+drives <- game_data_extra_context %>%
+  filter(!is.na(posteam), posteam != "", 
+         play_type %in% c("run", "pass", "no_play", "field_goal"), timeout == 0) %>%  # Remove rows without offensive team
+  group_by(fixed_drive) %>%
+  summarise(
+    qtr = first(qtr),
+    posteam = first(posteam),
+    drive_start_yard_line = first(yrdln), #yardline_100 for team name+yard line
+    plays = n(),
+    yards = sum(yards_gained, na.rm = TRUE),
+    points_scored = last(posteam_score_post) - first(posteam_score_post),
+    drive_result = case_when(
+      any(fixed_drive_result == "Touchdown") ~ "Touchdown",
+      any(fixed_drive_result == "Field Goal") ~ "Field Goal",
+      any(fixed_drive_result == "Interception" | fixed_drive_result == "Fumble") ~ "Turnover",
+      any(fixed_drive_result == 'Punt') ~ "Punt",
+      TRUE ~ "Other"
+    )
+  ) %>%
+  ungroup()
+```
+
+
+```{r, echo=FALSE}
 drives
+
+# 23 total drives in the game
 
 # For future reference because row 8 was an end of half situation there's an error in the points scored entry 
 # it should say 3 points scored
@@ -230,13 +274,138 @@ drives
 # The drives that say other were either a turnover on downs, a kneeldown, or a field goal kick at the end of halves as time expired
 ```
 
-Looking at the drives from the game, we can see that of the four drives following takeaways the Rams were able to score 2 touchdowns resulting in 14 points and the Seahawks were able to walk away with a field goal (3 points) on the drive following their takeaway. Based on our calculations from before we can see that the Rams were expected to score approximately 5.6 points based on their field position after the turnovers and the Seahawks were expected to score approximately 3.6 after their takeaway. This demonstrates that, despite poor field position, the Rams were able to capitalize on their defensive turnovers and converted them into two touchdowns on following drives. But it is worth noting the extra possessions were pivotal in the Rams winning the ball game because on all other offensive drives that didn't follow a turnover, they were only able to score 7 points.
 
+Looking at the drives from the game, we can see that of the four drives following takeaways the Rams were able to score 2 touchdowns on very short fields resulting in 14 points while the Seahawks were able to walk away with a field goal (3 points) on the drive following their takeaway. But outside of that on all other offensive drives the Rams were only able to score 7 points. Which to me is a testament to coach MacDonald and his defense being able to help keep the game close.
+
+
+```{r, include=FALSE}
+# slight modification for counting DBs
+game_data_extra_context <- game_data_extra_context %>%
+  mutate(
+    n_db = replace_na(as.integer(str_extract(defense_personnel, "(\\d+)(?= CB)")), 0) +
+           replace_na(as.integer(str_extract(defense_personnel, "(\\d+)(?= FS)")), 0) +
+           replace_na(as.integer(str_extract(defense_personnel, "(\\d+)(?= SS)")), 0)
+  )
+
+# Next we should filter out plays that are extra points, punts, and no plays
+
+# We then want to look at points scored on these drives versus the rest of the game
+```
+
+```{r, include=FALSE}
+turnover_drives <- turnovers %>%
+  mutate(next_drive = fixed_drive + 1) %>%
+  pull(next_drive)
+
+drives_after_turnovers <- game_data_extra_context %>%
+  filter(fixed_drive %in% turnover_drives)
+
+drives_after_turnovers %>% View()
+```
+
+```{r, include=FALSE}
+drives_after_turnovers %>% 
+  filter(!is.na(play_type) & play_type != 'no_play')
+```
+
+
+```{r, include=FALSE}
+# Want to look at drives where Seattle was on defense that wasn't following a turnover
+drives_not_after_turnovers <- game_data_extra_context %>%
+  filter(fixed_drive %in% turnover_drives == FALSE)
+
+  
+snaps_seattle_defense <- drives_not_after_turnovers %>% filter(defteam == "SEA")  
+
+snaps_seattle_defense %>% filter(!is.na(defense_coverage_type))
+```
+
+
+
+```{r, include=FALSE}
+snaps_seattle_defense_new <- snaps_seattle_defense %>% select(posteam, posteam_type, defteam, side_of_field,
+                                 yardline_100, drive, qtr, down, ydstogo, ydsnet,
+                                 play_type, yards_gained, shotgun, no_huddle, qb_dropback,
+                                 qb_scramble, pass_length, pass_location, air_yards, yards_after_catch,
+                                 run_location, run_gap, ep, epa, wp, wpa, interception, fumble_forced,
+                                 qb_hit, sack, fumble, rushing_yards, n_defense_box, is_qb_out_of_pocket,
+                                 is_interception_worthy, is_throw_away, read_thrown, n_blitzers, n_pass_rushers,
+                                 defenders_in_box, defense_personnel, time_to_throw, was_pressure, 
+                                 route, defense_man_zone_type, defense_coverage_type, n_db)
+```
+
+
+
+```{r, echo=FALSE}
+snaps_seattle_defense %>% filter(!is.na(defense_coverage_type)) %>%
+  #filter(defteam == "SEA") %>%
+  count(defense_coverage_type) %>%
+  ggplot(aes(x = reorder(defense_coverage_type, -n), y = n)) +
+  geom_col(fill = "green") +
+  scale_y_continuous(breaks = 0:12) +
+  labs(
+    title = "Seattle Defensive Coverage on Drives That Did Not Follow a Turnover",
+    x = "Coverage Type",
+    y = "Number of Plays"
+  )
+```
+
+
+We can see that the majority of the time that the Seahawks were in a MoF closed coverage on defense (either Cover 1 of Cover 3). And when they weren't, they were either in a variation of Cover 2 (Zone or Man) while sprinkling in some Cover 0.
+
+Now I feel it would also be helpful to look at the personnel that the Seahawks deployed while in these various coverages. So I adjusted the visualization slightly to include defensive personnel (4 DBs as Base, 5 DBs for Nickel, and 6+ DBs for Dime). It is worth noting that I know the Seahawks opt for Nickel personnel most of the time but I still classified Base defense as having 4 defensive backs on the field. 
+
+
+```{r, echo=FALSE}
+snaps_seattle_defense %>% filter(!is.na(defense_coverage_type)) %>%
+  mutate(personnel_group = case_when(
+    n_db <= 4 ~ "Base (<=4 DB)",
+    n_db == 5 ~ "Nickel (5 DB)",
+    n_db >= 6 ~ "Dime (6+ DB)",
+  )) %>%
+  mutate(personnel_group = factor(personnel_group, 
+                                  levels = c("Base (<=4 DB)", "Nickel (5 DB)", "Dime (6+ DB)"))) %>% 
+  count(personnel_group, defense_coverage_type) %>%
+  ggplot(aes(x = personnel_group, y = n, fill = defense_coverage_type)) +
+  geom_col() +
+  scale_y_continuous(breaks = 0:13) +
+  labs(
+    title = "Seattle Defensive Personnel and Coverage on Drives that Did Not Follow a Turnover",
+    x = "Personnel Group",
+    y = "Number of Plays",
+    fill = "Coverage Type"
+  ) +
+  theme(plot.title = element_text(size = 12))
+```
+
+For clarification I know depending on the scenario less than 4 DBs is classified differently from team to team but for simplicity I group them in Base here. 
+
+I then wanted to pair this with looking exactly at how Seattle defended the pass against the Rams on these defensive snaps. So I opted to look at Stafford's average time to throw on top of looking at the what reads he was able to throw to in his progression. 
+
+```{r, echo=FALSE}
+snaps_seattle_defense_new %>% filter(play_type == 'pass') %>% 
+  summarise(avg_time_to_throw = mean(time_to_throw))
+```
+
+```{r, echo=FALSE}
+snaps_seattle_defense_new %>% filter(play_type == 'pass') %>%
+  count(read_thrown) %>%
+  ggplot(aes(x = read_thrown, y = n)) +
+  geom_col(fill = "navy") +
+  scale_x_discrete(labels = c('CHK' = "Checkdown", "DES" = "Designated Read")) +
+  labs(
+    title = "Affect of Coverage on Stafford Progression Reads",
+    x = "Read Thrown in The Progression",
+    y = "Number of Plays"
+  )
+```
+
+Looking at the numbers we can see that he had just over 2.2 seconds to get rid of the ball and rarely got to his second or third read on pass plays. That shows me that if the play didn't have a designated target, Stafford either had to go to his first read or the checkdown option most of the time. Which in turn tells me that the Seahawks did a good job defending pass plays by limiting the options the opposing quarterback had after the snap.
 
 
 ## Visualization: Turnover Locations
 
-```{r turnover-plot}
+```{r turnover-plot, echo=FALSE}
 
 # add epa to this as well
 # Changed graph to use EPA versus EP
@@ -246,10 +415,13 @@ turnover_analysis %>%
                    y = 0, yend = turnover_location,
                    color = turnover_team),
                 linewidth = 2) +
-  geom_point(aes(size = expected_points_added, color = turnover_team), alpha = 0.7)+
+  geom_point(aes(size = abs(expected_points_added), color = turnover_team), alpha = 0.7)+
   # Set team colors
   scale_color_manual(values = c("LA" = "navy", "SEA" = "green"), 
                      name = "Team That Took the Ball Away")+
+  scale_size_continuous(
+    name = "Absolute Value of Expected Points Added"
+  ) +
   scale_y_reverse(breaks = seq(0, 100, 10)) +
   labs(
     title = "Turnover Field Position and Expected Points Added",
@@ -257,7 +429,8 @@ turnover_analysis %>%
     y = "Yards from Opponent's Goal Line"
   ) + theme_minimal()
 ```
-The visualization shows that field position varied significantly across all of turnovers. While Seattle's single turnover and the Rams' fourth-quarter interception both occurred around the 35-yard line in opponent territory, the Rams' other three turnovers were deep in their own half, between their 21 and 36-yard lines.
+
+The visualization shows that field position varied significantly across all of turnovers. We can see that 3 of 4 turnovers lead to the Rams getting great field position in Seahawks territory which we know led to them coming away with two touchdowns.
 
 
 ---
@@ -268,7 +441,7 @@ Now that we know the turnovers helped the Rams win the ball game, let's examine 
 
 ## Win Probability Data
 
-```{r win-prob-data}
+```{r win-prob-data, include=FALSE}
 # Get plays with win probability data
 wp_data <- game_data_extra_context %>% 
   filter(!is.na(posteam), posteam != "") %>%
@@ -281,12 +454,12 @@ wp_data <- game_data_extra_context %>%
   ) %>%
   mutate(play_number = row_number())
 
-wp_data
+#wp_data
 ```
 
 ## Biggest Win Probability Swings
 
-```{r biggest-swings}
+```{r biggest-swings, echo=FALSE}
 # Taking a look at the ten plays that had the largest swings on win probability 
 biggest_swings <- wp_data %>%
   filter(!is.na(wpa)) %>%
@@ -296,7 +469,7 @@ biggest_swings <- wp_data %>%
 biggest_swings %>% select(qtr, time, posteam, wpa, ep, epa, desc)
 ```
 
-```{r}
+```{r, echo=FALSE}
 biggest_swings %>%
   mutate(wpa_pct = paste0(round(wpa * 100, 1), "%"))
 ```
@@ -308,12 +481,47 @@ While many plays impacted both teams' ability to win this game, the one with the
 
 ## Visualization: Win Probability Flow
 
-```{r win-prob-chart}
+```{r win-prob-chart, echo=FALSE}
+turnover_lines <- wp_data %>%
+  filter(interception == 1 | fumble_lost == 1) %>%
+  select(play_number, posteam)
+
+la_turnovers <- turnover_lines %>% filter(posteam == "LA")
+sea_turnovers <- turnover_lines %>% filter(posteam == "SEA")
+
+turnover_labels <- c("SEA INT 1", "SEA INT 2", "LAR Fumble", "SEA INT 3", "SEA INT 4")
+
+# ggplot(wp_data, aes(x = play_number)) +
+#   geom_line(aes(y = home_wp, color = "LA Rams"), linewidth = 1.5) +
+#   geom_line(aes(y = away_wp, color = "SEA Seahawks"), linewidth = 1.5) +
+#   geom_vline(data = turnover_lines, 
+#              aes(xintercept = play_number, color = defteam),
+#              linetype = "dashed", alpha = 0.7) +
+#   geom_hline(yintercept = 0.5, linetype = "dashed", alpha = 0.5) +
+#   scale_color_manual(values = c("LA Rams" = "navy", "SEA Seahawks" = "green"), name = 'Team') +
+#   scale_y_continuous(labels = scales::percent_format()) +
+#   labs(
+#     title = "Win Probability: LA Rams vs Seattle Seahawks",
+#     x = "Play Number",
+#     y = "Win Probability"
+#   ) + theme_minimal()
+
+
 ggplot(wp_data, aes(x = play_number)) +
   geom_line(aes(y = home_wp, color = "LA Rams"), linewidth = 1.5) +
   geom_line(aes(y = away_wp, color = "SEA Seahawks"), linewidth = 1.5) +
+  geom_vline(data = la_turnovers,
+             aes(xintercept = play_number),
+             color = "navy", linetype = "dashed", linewidth = 0.8, alpha = 0.7) +
+  geom_vline(data = sea_turnovers,
+             aes(xintercept = play_number),
+             color = "green", linetype = "dashed", linewidth = 0.8, alpha = 0.7) +
+ annotate("text", x = turnover_lines$play_number, y = c(0.95, 0.85, 0.95, 0.95, 0.95),
+         label = turnover_labels,
+         angle = 30, size = 3, hjust = 1) +
   geom_hline(yintercept = 0.5, linetype = "dashed", alpha = 0.5) +
-  scale_color_manual(values = c("LA Rams" = "navy", "SEA Seahawks" = "green")) +
+  scale_color_manual(values = c("LA Rams" = "navy", "SEA Seahawks" = "green"),
+                     name = "Team") +
   scale_y_continuous(labels = scales::percent_format()) +
   labs(
     title = "Win Probability: LA Rams vs Seattle Seahawks",
@@ -332,18 +540,17 @@ Looking at the chart, we can see that LA had a win probability of over 50% for t
 
 This analysis tried to get to the bottom of two questions: Did the Rams capitalize on their takeaways, and how did the turnovers affect the flow of the game and win probability? The data showed us that 2 out 4 drives following a Rams takeaway, they were able to go down and score a touchdown resulting in 14 points. Additionally, the game started off being very competitive, but after that first Sam Darnold interception, the win probability swung in the Rams' favour and they were projected to win for the rest of the ball game. 
 
-This game was close for several reasons. Mainly, 3 out of 4 times after the Rams got a takeaway, they started in their own territory and had to drive close to the length of the field, limiting their expected point totals despite generating turnovers. Additionally, the Rams' offense struggled outside of turnover opportunities, scoring only 7 points on all other drives, revealing their heavy dependence on defensive play making. Meanwhile, the Seahawks converted their single takeaway into a field goal and remained within striking distance throughout. Despite trailing for most of the game, Seattle had a legitimate chance to win on the final play with a 61-yard field goal attempt that matched kicker Jason Myers' career long.
+This game was close for several reasons. The Rams' offense struggled outside of turnover opportunities, scoring only 7 points on all other drives, revealing their heavy dependence on defensive play making. But we can see that the Seahawks did a great job at limiting Stafford and the Rams explosive pass attack by limiting options and taking away explosive plays. Meanwhile, the Seahawks converted their single takeaway into a field goal and remained within striking distance throughout. Despite trailing for most of the game, Seattle had a legitimate chance to win on the final play with a 61-yard field goal attempt that matched kicker Jason Myers' career long.
 
 
 ---
 
 # Conclusion
      
-This analysis shows that while turnovers are a major driver of game outcomes, their impact is highly context dependent. Despite turning the ball over four times, Seattle remained competitive and had a realistic chance to win on the final play. This underscores how factors such as field position, offensive efficiency, and situational leverage can offset even significant turnover disadvantages.
+This analysis shows that while turnovers are a major driver of game outcomes, their impact is highly context dependent. Despite turning the ball over four times, Seattle remained competitive and had a realistic chance to win on the final play thanks to their stellar play on defense. This underscores how factors such as field position, offensive efficiency, and situational leverage can offset even significant turnover disadvantages.
 
-Although the Rams forced four takeaways, they struggled to consistently convert those opportunities into points. Outside of drives following turnovers, their offense produced just seven points, highlighting a reliance on defensive play making rather than sustained offensive efficiency.
+Although the Rams forced four takeaways and managed to score touchdowns off of two of them, they struggled to score points outside of short field scenarios. Their offense produced just seven points on drives that didn't follow a turnover, highlighting a reliance on defensive play making rather than sustained offensive efficiency.
 
-Future analysis could focus on third-down efficiency, red zone efficiency, and personnel usage to better understand why both offenses stalled frequently and how specific tactical decisions influenced scoring outcomes.    
 
 ---
 
